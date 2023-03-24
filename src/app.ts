@@ -37,6 +37,14 @@ app.use(
 app.use("/api/notes", requiresAuth, notesRoutes);
 app.use("/api/users", userRoutes);
 
+if (env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  });
+}
+
 app.use((req, res, next) => {
   next(createHttpError(404, "Endpoint not found"));
 });
@@ -53,13 +61,5 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   }
   res.status(statusCode).json({ error: errorMessage });
 });
-
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static("client/build"));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-  });
-}
 
 export default app;
