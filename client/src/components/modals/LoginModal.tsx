@@ -1,46 +1,50 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import TextInputField from "./form/TextInputField";
+import ErrorText from "../form/ErrorText";
+import TextInputField from "../form/TextInputField";
 
-import { User } from "../models/user";
-import { SignUpCredentials } from "../network/user_api";
-import * as SignUpApi from "../network/user_api";
+import { User } from "../../models/user";
+import { LoginCredentials } from "../../network/user_api";
+import * as SignUpApi from "../../network/user_api";
+import { UnauthorizedError } from "../../errors/httpErrors";
 
-interface SignUpModalProps {
-  onHideSignUpModal: () => void;
-  onSignUpSuccess: (user: User) => void;
+interface LoginModalProps {
+  onHideLoginModal: () => void;
+  onLoginSuccess: (user: User) => void;
 }
 
-const SignUpModal = ({
-  onHideSignUpModal,
-  onSignUpSuccess,
-}: SignUpModalProps) => {
+const LoginModal = ({ onHideLoginModal, onLoginSuccess }: LoginModalProps) => {
+  const [errorText, setErrorText] = useState("");
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpCredentials>();
+  } = useForm<LoginCredentials>();
 
   const onSubmit = useCallback(
-    async (credentials: SignUpCredentials) => {
+    async (credentials: LoginCredentials) => {
       try {
-        const newUser = await SignUpApi.signUp(credentials);
-        onSignUpSuccess(newUser);
+        const newUser = await SignUpApi.login(credentials);
+        onLoginSuccess(newUser);
       } catch (error) {
-        alert(error);
+        if (error instanceof UnauthorizedError) {
+          setErrorText(error.message);
+        } else {
+          alert(error);
+        }
         console.log(error);
       }
     },
-    [onSignUpSuccess]
+    [onLoginSuccess]
   );
 
   return (
     <div
-      id="signupModal"
+      id="loginModal"
       tabIndex={-1}
       aria-hidden="true"
-      className="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full"
+      className="fixed top-1/4 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] md:h-full"
     >
       <div className="relative w-full h-full max-w-2xl m-auto md:h-auto">
         <div className="relative bg-white rounded-lg shadow">
@@ -50,7 +54,7 @@ const SignUpModal = ({
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
               data-modal-hide="defaultModal"
-              onClick={onHideSignUpModal}
+              onClick={onHideLoginModal}
             >
               <svg
                 aria-hidden="true"
@@ -69,9 +73,10 @@ const SignUpModal = ({
             </button>
           </div>
           <div className="w-full">
+            {errorText && <ErrorText errorText={errorText} />}
             <form
               className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-              id="signupForm"
+              id="loginForm"
               onSubmit={handleSubmit(onSubmit)}
             >
               <div className="mb-4">
@@ -83,17 +88,6 @@ const SignUpModal = ({
                   register={register}
                   registerOptions={{ required: "Required" }}
                   error={errors.username}
-                />
-              </div>
-              <div className="mb-4">
-                <TextInputField
-                  name="email"
-                  label="Email"
-                  type="email"
-                  placeholder="Email"
-                  register={register}
-                  registerOptions={{ required: "Required" }}
-                  error={errors.email}
                 />
               </div>
               <div className="mb-4">
@@ -112,10 +106,10 @@ const SignUpModal = ({
                 <button
                   className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                   type="submit"
-                  form="signupForm"
+                  form="loginForm"
                   disabled={isSubmitting}
                 >
-                  Sign Up
+                  Login
                 </button>
               </div>
             </form>
@@ -126,4 +120,4 @@ const SignUpModal = ({
   );
 };
 
-export default SignUpModal;
+export default LoginModal;

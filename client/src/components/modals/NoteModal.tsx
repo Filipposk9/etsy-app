@@ -1,53 +1,71 @@
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 
-import TextInputField from "./form/TextInputField";
+import TextInputField from "../form/TextInputField";
 
-import { User } from "../models/user";
-import { LoginCredentials } from "../network/user_api";
-import * as SignUpApi from "../network/user_api";
+import { Note } from "../../models/note";
+import { NoteInput } from "../../network/notes_api";
+import * as NotesApi from "../../network/notes_api";
 
-interface LoginModalProps {
-  onHideLoginModal: () => void;
-  onLoginSuccess: (user: User) => void;
+interface NoteDialogProps {
+  noteToEdit?: Note;
+  onHideNoteModal: () => void;
+  onNoteSave: (note: Note) => void;
 }
 
-const SignUpModal = ({ onHideLoginModal, onLoginSuccess }: LoginModalProps) => {
+const NoteModal = ({
+  noteToEdit,
+  onHideNoteModal,
+  onNoteSave,
+}: NoteDialogProps): JSX.Element => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginCredentials>();
+  } = useForm<NoteInput>({
+    defaultValues: {
+      title: noteToEdit?.title || "",
+      text: noteToEdit?.text || "",
+    },
+  });
 
   const onSubmit = useCallback(
-    async (credentials: LoginCredentials) => {
+    async (input: NoteInput) => {
       try {
-        const newUser = await SignUpApi.login(credentials);
-        onLoginSuccess(newUser);
+        let noteResponse: Note;
+
+        if (noteToEdit) {
+          noteResponse = await NotesApi.updateNote(noteToEdit._id, input);
+        } else {
+          noteResponse = await NotesApi.createNote(input);
+        }
+
+        onNoteSave(noteResponse);
       } catch (error) {
-        alert(error);
         console.log(error);
       }
     },
-    [onLoginSuccess]
+    [noteToEdit, onNoteSave]
   );
 
   return (
     <div
-      id="loginModal"
+      id="noteModal"
       tabIndex={-1}
       aria-hidden="true"
-      className="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full"
+      className="fixed top-1/4 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] md:h-full"
     >
       <div className="relative w-full h-full max-w-2xl m-auto md:h-auto">
         <div className="relative bg-white rounded-lg shadow">
           <div className="flex items-start justify-between p-4 border-b rounded-t">
-            <h3 className="text-xl font-semibold text-gray-900">Register</h3>
+            <h3 className="text-xl font-semibold text-gray-900">
+              {noteToEdit ? "Edit note" : "Add note"}
+            </h3>
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
               data-modal-hide="defaultModal"
-              onClick={onHideLoginModal}
+              onClick={onHideNoteModal}
             >
               <svg
                 aria-hidden="true"
@@ -68,40 +86,46 @@ const SignUpModal = ({ onHideLoginModal, onLoginSuccess }: LoginModalProps) => {
           <div className="w-full">
             <form
               className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-              id="loginForm"
+              id="addEditNoteForm"
               onSubmit={handleSubmit(onSubmit)}
             >
               <div className="mb-4">
                 <TextInputField
-                  name="username"
-                  label="Username"
+                  name="title"
+                  label="Title"
                   type="text"
-                  placeholder="Username"
+                  placeholder="Title"
                   register={register}
                   registerOptions={{ required: "Required" }}
-                  error={errors.username}
+                  error={errors.title}
                 />
               </div>
-              <div className="mb-4">
-                <TextInputField
-                  name="password"
-                  label="Password"
-                  type="password"
-                  placeholder="Password"
-                  register={register}
-                  registerOptions={{ required: "Required" }}
-                  error={errors.password}
+              <div className="mb-6">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="text"
+                >
+                  Text
+                </label>
+                <textarea
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                  id="text"
+                  placeholder="Text"
+                  rows={3}
+                  {...register("text")}
                 />
+                {errors.text?.message ? (
+                  <p className="text-red-600">{errors.text?.message}</p>
+                ) : null}
               </div>
-
               <div className="flex items-center justify-between">
                 <button
                   className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                   type="submit"
-                  form="loginForm"
+                  form="addEditNoteForm"
                   disabled={isSubmitting}
                 >
-                  Login
+                  {noteToEdit ? "Edit note" : "Add note"}
                 </button>
               </div>
             </form>
@@ -112,4 +136,4 @@ const SignUpModal = ({ onHideLoginModal, onLoginSuccess }: LoginModalProps) => {
   );
 };
 
-export default SignUpModal;
+export default NoteModal;

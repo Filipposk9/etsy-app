@@ -6,6 +6,8 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/src/server.js",
+    "server": "nodemon src/server.ts",
+    "client": "cd client && npm run start",
     "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\"",
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -22,6 +24,7 @@
     "@types/morgan": "^1.9.4",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",
+    "concurrently": "^7.6.0",
     "eslint": "^8.36.0",
     "nodemon": "^2.0.21",
     "prettier": "^2.8.4",

@@ -25,7 +25,7 @@ const NavBarLoggedInView = ({
   return (
     <>
       <p className="text-white text-sm font-medium">
-        Signed in as: {user.username}
+        Logged in as: {user.username}
       </p>
       <button
         className="w-20 bg-gray-900 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium"

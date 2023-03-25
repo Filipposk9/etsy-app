@@ -1,71 +1,63 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import TextInputField from "./form/TextInputField";
+import TextInputField from "../form/TextInputField";
+import ErrorText from "../form/ErrorText";
 
-import { Note } from "../models/note";
-import { NoteInput } from "../network/notes_api";
-import * as NotesApi from "../network/notes_api";
+import { User } from "../../models/user";
+import { SignUpCredentials } from "../../network/user_api";
+import * as SignUpApi from "../../network/user_api";
+import { ConflictError } from "../../errors/httpErrors";
 
-interface NoteDialogProps {
-  noteToEdit?: Note;
-  onHideNoteModal: () => void;
-  onNoteSave: (note: Note) => void;
+interface SignUpModalProps {
+  onHideSignUpModal: () => void;
+  onSignUpSuccess: (user: User) => void;
 }
 
-const NoteModal = ({
-  noteToEdit,
-  onHideNoteModal,
-  onNoteSave,
-}: NoteDialogProps): JSX.Element => {
+const SignUpModal = ({
+  onHideSignUpModal,
+  onSignUpSuccess,
+}: SignUpModalProps) => {
+  const [errorText, setErrorText] = useState("");
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<NoteInput>({
-    defaultValues: {
-      title: noteToEdit?.title || "",
-      text: noteToEdit?.text || "",
-    },
-  });
+  } = useForm<SignUpCredentials>();
 
   const onSubmit = useCallback(
-    async (input: NoteInput) => {
+    async (credentials: SignUpCredentials) => {
       try {
-        let noteResponse: Note;
-
-        if (noteToEdit) {
-          noteResponse = await NotesApi.updateNote(noteToEdit._id, input);
-        } else {
-          noteResponse = await NotesApi.createNote(input);
-        }
-
-        onNoteSave(noteResponse);
+        const newUser = await SignUpApi.signUp(credentials);
+        onSignUpSuccess(newUser);
       } catch (error) {
+        if (error instanceof ConflictError) {
+          setErrorText(error.message);
+        } else {
+          alert(error);
+        }
         console.log(error);
       }
     },
-    [noteToEdit, onNoteSave]
+    [onSignUpSuccess]
   );
 
   return (
     <div
-      id="noteModal"
+      id="signupModal"
       tabIndex={-1}
       aria-hidden="true"
-      className="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full"
+      className="fixed top-1/4 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] md:h-full"
     >
       <div className="relative w-full h-full max-w-2xl m-auto md:h-auto">
         <div className="relative bg-white rounded-lg shadow">
           <div className="flex items-start justify-between p-4 border-b rounded-t">
-            <h3 className="text-xl font-semibold text-gray-900">
-              {noteToEdit ? "Edit note" : "Add note"}
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-900">Register</h3>
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
               data-modal-hide="defaultModal"
-              onClick={onHideNoteModal}
+              onClick={onHideSignUpModal}
             >
               <svg
                 aria-hidden="true"
@@ -84,48 +76,54 @@ const NoteModal = ({
             </button>
           </div>
           <div className="w-full">
+            {errorText && <ErrorText errorText={errorText} />}
             <form
               className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-              id="addEditNoteForm"
+              id="signupForm"
               onSubmit={handleSubmit(onSubmit)}
             >
               <div className="mb-4">
                 <TextInputField
-                  name="title"
-                  label="Title"
+                  name="username"
+                  label="Username"
                   type="text"
-                  placeholder="Title"
+                  placeholder="Username"
                   register={register}
                   registerOptions={{ required: "Required" }}
-                  error={errors.title}
+                  error={errors.username}
                 />
               </div>
-              <div className="mb-6">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="text"
-                >
-                  Text
-                </label>
-                <textarea
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                  id="text"
-                  placeholder="Text"
-                  rows={3}
-                  {...register("text")}
+              <div className="mb-4">
+                <TextInputField
+                  name="email"
+                  label="Email"
+                  type="email"
+                  placeholder="Email"
+                  register={register}
+                  registerOptions={{ required: "Required" }}
+                  error={errors.email}
                 />
-                {errors.text?.message ? (
-                  <p className="text-red-600">{errors.text?.message}</p>
-                ) : null}
               </div>
+              <div className="mb-4">
+                <TextInputField
+                  name="password"
+                  label="Password"
+                  type="password"
+                  placeholder="Password"
+                  register={register}
+                  registerOptions={{ required: "Required" }}
+                  error={errors.password}
+                />
+              </div>
+
               <div className="flex items-center justify-between">
                 <button
                   className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                   type="submit"
-                  form="addEditNoteForm"
+                  form="signupForm"
                   disabled={isSubmitting}
                 >
-                  {noteToEdit ? "Edit note" : "Add note"}
+                  Sign Up
                 </button>
               </div>
             </form>
@@ -136,4 +134,4 @@ const NoteModal = ({
   );
 };
 
-export default NoteModal;
+export default SignUpModal;
