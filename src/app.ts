@@ -8,10 +8,11 @@ import path from "path";
 
 import notesRoutes from "./routes/notes";
 import userRoutes from "./routes/users";
+import etsyRoutes from "./routes/etsy";
 
 import { requiresAuth } from "./middleware/auth";
 
-import env from "./util/validateEnv";
+import env from "./utils/validateEnv";
 
 const app: Express = express();
 
@@ -36,6 +37,7 @@ app.use(
 
 app.use("/api/notes", requiresAuth, notesRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/etsy", etsyRoutes);
 
 if (env.NODE_ENV === "production") {
   app.use(express.static("client/build"));

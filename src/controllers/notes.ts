@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 import NoteModel from "../models/note";
 
-import { assertIsDefined } from "../util/assertIsDefined";
+import { assertIsDefined } from "../utils/assertIsDefined";
 export const getNotes: RequestHandler = async (req, res, next) => {
   const authenticatedUserId = req.session.userId;
 

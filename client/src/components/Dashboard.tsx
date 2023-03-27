@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import NavBar from "./navBar/NavBar";
-import Notes from "./Notes";
+import Notes from "../pages/Notes";
 import LoginModal from "./modals/LoginModal";
 import SignUpModal from "./modals/SignUpModal";
-import Etsy from "./Etsy";
+import Etsy from "../pages/Etsy";
+import EtsyCallback from "../pages/EtsyCallback";
 
 import { User } from "../models/user";
 import * as UsersApi from "../network/user_api";
@@ -44,6 +45,7 @@ const Dashboard = () => {
       <Routes>
         <Route path="/" element={<Notes loggedInUser={loggedInUser} />}></Route>
         <Route path="/etsy" element={<Etsy />} />
+        <Route path="/etsy/callback" element={<EtsyCallback />} />
       </Routes>
 
       {showLogInModal && (

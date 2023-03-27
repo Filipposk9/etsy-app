@@ -2,7 +2,7 @@ import app from "./app";
 
 import mongoose from "mongoose";
 
-import env from "./util/validateEnv";
+import env from "./utils/validateEnv";
 
 const port = env.PORT || 5000;
 

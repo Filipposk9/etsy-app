@@ -1,8 +1,8 @@
 import { HTMLAttributes, useCallback, useEffect, useState } from "react";
 
-import Spinner from "./Spinner";
-import Note from "./Note";
-import NoteModal from "./modals/NoteModal";
+import Spinner from "../components/Spinner";
+import Note from "../components/Note";
+import NoteModal from "../components/modals/NoteModal";
 
 import { Note as NoteModel } from "../models/note";
 import { User } from "../models/user";
@@ -91,9 +91,11 @@ const Notes = ({ loggedInUser }: Props) => {
 
   if (showNotesLoadingError) {
     return (
-      <p className="text-red-600 mt-4">
-        Something went wrong while fetching notes. Refresh the page!
-      </p>
+      <div className="mt-16">
+        <p className="text-2xl text-red-600 font-medium text-center mt-16">
+          Something went wrong while fetching notes. Refresh the page!
+        </p>
+      </div>
     );
   }
 

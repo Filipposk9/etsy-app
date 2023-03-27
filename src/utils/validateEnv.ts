@@ -6,4 +6,6 @@ export default cleanEnv(process.env, {
   PORT: port(),
   SESSION_SECRET: str(),
   NODE_ENV: str(),
+  ETSY_AUTH_CALLBACK: str(),
+  ETSY_API_KEY: str(),
 });
