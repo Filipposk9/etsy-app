@@ -57,9 +57,9 @@ app.use("/api/notes", auth_1.requiresAuth, notes_1.default);
 app.use("/api/users", users_1.default);
 app.use("/api/etsy", etsy_1.default);
 if (validateEnv_1.default.NODE_ENV === "production") {
-    app.use(express_1.default.static("app/client/build"));
+    app.use(express_1.default.static("/app/client/build"));
     app.get("*", (req, res) => {
-        res.sendFile(path_1.default.resolve(__dirname, "app/client", "build", "index.html"));
+        res.sendFile(path_1.default.resolve(__dirname, "/app/client", "build", "index.html"));
     });
 }
 app.use((req, res, next) => {
