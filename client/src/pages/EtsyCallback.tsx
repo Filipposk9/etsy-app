@@ -26,7 +26,7 @@ const EtsyCallback = () => {
   }, [navigate, params]);
 
   return (
-    <div className="mt-16">
+    <div className="flex justify-center items-center h-[calc(100vh-64px)] mt-16">
       <Spinner />
     </div>
   );

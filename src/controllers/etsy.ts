@@ -97,7 +97,7 @@ export const getData: RequestHandler = async (req, res, next) => {
     }
 
     const response = await axios.get(
-      `https://api.etsy.com/v3/application/shops/${env.ETSY_SHOP_ID}/receipts?is_shipped=true&limit=50`,
+      `https://api.etsy.com/v3/application/shops/${env.ETSY_SHOP_ID}/receipts?was_shipped=false&sort_on=created&sort_order=asc&limit=50`,
       {
         headers: {
           "x-api-key": env.ETSY_API_KEY,

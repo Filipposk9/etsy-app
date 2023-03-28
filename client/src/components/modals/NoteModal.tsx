@@ -120,7 +120,7 @@ const NoteModal = ({
               </div>
               <div className="flex items-center justify-between">
                 <button
-                  className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  className="bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600"
                   type="submit"
                   form="addEditNoteForm"
                   disabled={isSubmitting}

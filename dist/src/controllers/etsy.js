@@ -96,7 +96,7 @@ const getData = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
         if (!token) {
             throw (0, http_errors_1.default)(404, "Oauth tokens missing");
         }
-        const response = yield axios_1.default.get(`https://api.etsy.com/v3/application/shops/${validateEnv_1.default.ETSY_SHOP_ID}/receipts?is_shipped=true&limit=50`, {
+        const response = yield axios_1.default.get(`https://api.etsy.com/v3/application/shops/${validateEnv_1.default.ETSY_SHOP_ID}/receipts?was_shipped=false&sort_on=created&sort_order=asc&limit=50`, {
             headers: {
                 "x-api-key": validateEnv_1.default.ETSY_API_KEY,
                 Authorization: `${token.token_type} ${token.access_token}`,

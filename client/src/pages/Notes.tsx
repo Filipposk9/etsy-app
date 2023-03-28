@@ -73,7 +73,7 @@ const Notes = ({ loggedInUser }: Props) => {
 
   if (notesLoading) {
     return (
-      <div className="mt-16">
+      <div className="flex justify-center items-center h-[calc(100vh-64px)] mt-16">
         <Spinner />
       </div>
     );
@@ -100,10 +100,10 @@ const Notes = ({ loggedInUser }: Props) => {
   }
 
   return (
-    <div className="flex flex-col h-full items-center py-4 mt-16">
+    <div className="flex flex-col items-center py-4 mt-16">
       <>
         <button
-          className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600"
           onClick={handleAddNoteClick}
         >
           Add Note
