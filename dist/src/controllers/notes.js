@@ -16,7 +16,7 @@ exports.deleteNote = exports.updateNote = exports.createNote = exports.getNote =
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const note_1 = __importDefault(require("../models/note"));
-const assertIsDefined_1 = require("../util/assertIsDefined");
+const assertIsDefined_1 = require("../utils/assertIsDefined");
 const getNotes = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authenticatedUserId = req.session.userId;
     try {

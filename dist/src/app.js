@@ -35,8 +35,9 @@ const morgan_1 = __importDefault(require("morgan"));
 const path_1 = __importDefault(require("path"));
 const notes_1 = __importDefault(require("./routes/notes"));
 const users_1 = __importDefault(require("./routes/users"));
+const etsy_1 = __importDefault(require("./routes/etsy"));
 const auth_1 = require("./middleware/auth");
-const validateEnv_1 = __importDefault(require("./util/validateEnv"));
+const validateEnv_1 = __importDefault(require("./utils/validateEnv"));
 const app = (0, express_1.default)();
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.json());
@@ -54,6 +55,7 @@ app.use((0, express_session_1.default)({
 }));
 app.use("/api/notes", auth_1.requiresAuth, notes_1.default);
 app.use("/api/users", users_1.default);
+app.use("/api/etsy", etsy_1.default);
 if (validateEnv_1.default.NODE_ENV === "production") {
     app.use(express_1.default.static("client/build"));
     app.get("*", (req, res) => {

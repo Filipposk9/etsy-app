@@ -5,9 +5,6 @@ const EtsyOathCredential = new Schema(
     codeVerifier: { type: String },
     codeChallenge: { type: String },
     state: { type: String },
-    authorizationCode: { type: String },
-    accessToken: { type: String },
-    refreshAuthToken: { type: String },
   },
   { timestamps: true }
 );

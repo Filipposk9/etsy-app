@@ -3,10 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import Spinner from "../components/Spinner";
 
 import { EtsyCredentials as EtsyCredentialsModel } from "../models/etsyCredentials";
+import { EtsyToken as EtsyTokenModel } from "../models/etsyToken";
 import * as EtsyApi from "../network/etsy_api";
 
 const Etsy = () => {
   const [credentials, setCredentials] = useState<EtsyCredentialsModel>();
+  const [token, setToken] = useState<EtsyTokenModel>();
+
   useEffect(() => {
     async function fetchCredentials() {
       try {
@@ -17,6 +20,18 @@ const Etsy = () => {
       }
     }
     fetchCredentials();
+  }, []);
+
+  useEffect(() => {
+    async function fetchToken() {
+      try {
+        const token = await EtsyApi.getAccessToken();
+        setToken(token);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchToken();
   }, []);
 
   const handleRefreshButtonClick = useCallback(() => {
@@ -31,10 +46,35 @@ const Etsy = () => {
     setCredentials();
   }, []);
 
-  if (!credentials) {
+  const handleGetDataClick = useCallback(() => {
+    async function getData() {
+      try {
+        await EtsyApi.getData();
+      } catch (error) {
+        alert(error);
+        console.log(error);
+      }
+    }
+    getData();
+  }, []);
+
+  if (!credentials || !token) {
     return (
       <div className="mt-16">
         <Spinner />
+      </div>
+    );
+  }
+
+  if (token.access_token) {
+    return (
+      <div className="mt-16">
+        <button
+          className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          onClick={handleGetDataClick}
+        >
+          Get Data
+        </button>
       </div>
     );
   }
@@ -59,13 +99,6 @@ const Etsy = () => {
         onClick={handleRefreshButtonClick}
       >
         Refresh tokens
-      </button>
-
-      <button
-        className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-        onClick={handleRefreshButtonClick}
-      >
-        Get data
       </button>
     </div>
   );

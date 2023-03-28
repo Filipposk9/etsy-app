@@ -8,4 +8,5 @@ export default cleanEnv(process.env, {
   NODE_ENV: str(),
   ETSY_AUTH_CALLBACK: str(),
   ETSY_API_KEY: str(),
+  ETSY_SHOP_ID: str(),
 });

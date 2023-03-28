@@ -2,11 +2,11 @@ import axios from "axios";
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 
-import env from "../utils/validateEnv";
-
 import EtsyOauthCredentialModel from "../models/etsyOauthCredential";
 import EtsyTokenModel from "../models/etsyToken";
+
 import { codeVerifier, codeChallenge, state } from "../utils/pkce";
+import env from "../utils/validateEnv";
 
 export const setEtsyCredentials: RequestHandler = async (req, res, next) => {
   try {
@@ -55,11 +55,11 @@ export const setEtsyAccessToken: RequestHandler = async (req, res, next) => {
       "https://api.etsy.com/v3/public/oauth/token",
       requestOptions,
       {
-        headers: { "content-type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       }
     );
-
-    console.log("TOKEN: ", response.data);
 
     const token = await EtsyTokenModel.findOne().exec();
 
@@ -84,6 +84,31 @@ export const getEtsyAccessToken: RequestHandler = async (req, res, next) => {
     const etsyToken = await EtsyTokenModel.findOne({}).exec();
     res.status(200).json(etsyToken);
   } catch (error) {
+    next(error);
+  }
+};
+
+export const getData: RequestHandler = async (req, res, next) => {
+  try {
+    const token = await EtsyTokenModel.findOne({}).exec();
+
+    if (!token) {
+      throw createHttpError(404, "Oauth tokens missing");
+    }
+
+    const response = await axios.get(
+      `https://api.etsy.com/v3/application/shops/${env.ETSY_SHOP_ID}/receipts?is_shipped=true&limit=50`,
+      {
+        headers: {
+          "x-api-key": env.ETSY_API_KEY,
+          Authorization: `${token.token_type} ${token.access_token}`,
+        },
+      }
+    );
+
+    res.status(200).json(response.data.results);
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 };

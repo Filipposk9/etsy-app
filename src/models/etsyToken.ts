@@ -4,7 +4,7 @@ const etsyToken = new Schema(
   {
     access_token: { type: String },
     token_type: { type: String },
-    expires_in: { type: String },
+    expires_in: { type: Number },
     refresh_token: { type: String },
   },
   { timestamps: true }
