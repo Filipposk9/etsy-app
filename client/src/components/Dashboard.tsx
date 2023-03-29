@@ -7,6 +7,8 @@ import LoginModal from "./modals/LoginModal";
 import SignUpModal from "./modals/SignUpModal";
 import Etsy from "../pages/Etsy";
 import EtsyCallback from "../pages/EtsyCallback";
+import ProtectedRoute from "./ProtectedRoute";
+import NotFound from "../pages/NotFound";
 
 import { User } from "../models/user";
 import * as UsersApi from "../network/user_api";
@@ -44,8 +46,23 @@ const Dashboard = () => {
       />
       <Routes>
         <Route path="/" element={<Notes loggedInUser={loggedInUser} />}></Route>
-        <Route path="/etsy" element={<Etsy />} />
-        <Route path="/etsy/callback" element={<EtsyCallback />} />
+        <Route
+          path="/etsy"
+          element={
+            <ProtectedRoute user={loggedInUser}>
+              <Etsy />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/etsy/callback"
+          element={
+            <ProtectedRoute user={loggedInUser}>
+              <EtsyCallback />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       {showLogInModal && (

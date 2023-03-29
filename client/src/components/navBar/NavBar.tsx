@@ -84,7 +84,7 @@ const NavBar = ({
               <div className="flex space-x-4">
                 {/*Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
                 <NavBarLink route="/" text="Home" />
-                <NavBarLink route="/etsy" text="Etsy" />
+                {loggedInUser ? <NavBarLink route="/etsy" text="Etsy" /> : null}
               </div>
             </div>
           </div>
@@ -201,7 +201,7 @@ const NavBar = ({
         <div className="space-y-1 px-2 pt-2 pb-3">
           {/*Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white*/}
           <NavBarLink route="/" text="Home" />
-          <NavBarLink route="/etsy" text="Etsy" />
+          {loggedInUser ? <NavBarLink route="/etsy" text="Etsy" /> : null}
         </div>
       </div>
     </nav>
