@@ -26,7 +26,7 @@ const Orders = ({
         />
         <ol className="space-y-4 w-full">
           {orders.map((order) => (
-            <Order key={order.name} order={order} />
+            <Order key={`${order.name} - ${order.receipt_id}`} order={order} />
           ))}
         </ol>
       </div>

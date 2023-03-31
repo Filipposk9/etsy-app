@@ -17,6 +17,7 @@ export type OrderType = {
   postage_price?: {
     amount: number;
   };
+  receipt_id: number;
 };
 
 type Props = HTMLAttributes<HTMLLIElement> & { order: OrderType };
