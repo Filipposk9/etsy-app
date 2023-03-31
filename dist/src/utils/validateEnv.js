@@ -10,4 +10,6 @@ exports.default = (0, envalid_1.cleanEnv)(process.env, {
     ETSY_AUTH_CALLBACK: (0, validators_1.str)(),
     ETSY_API_KEY: (0, validators_1.str)(),
     ETSY_SHOP_ID: (0, validators_1.str)(),
+    GO_PROSVASIS_APPID: (0, validators_1.str)(),
+    GO_PROSVASIS_TOKEN: (0, validators_1.str)(),
 });

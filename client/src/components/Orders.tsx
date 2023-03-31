@@ -17,9 +17,10 @@ const Orders = ({
 
   return (
     <div className="w-3/4 mt-4 mx-auto">
-      <div className="flex flex-col">
+      <div className="flex flex-col bg-gray-600 p-2 rounded-2xl">
         <MdRefresh
           size={24}
+          color="white"
           className="self-end cursor-pointer"
           onClick={onHandleRefreshButtonClick}
         />

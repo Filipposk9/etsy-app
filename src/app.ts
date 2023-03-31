@@ -9,6 +9,7 @@ import path from "path";
 import notesRoutes from "./routes/notes";
 import userRoutes from "./routes/users";
 import etsyRoutes from "./routes/etsy";
+import goProsvasisRoutes from "./routes/goProsvasis";
 
 import { requiresAuth } from "./middleware/auth";
 
@@ -38,6 +39,7 @@ app.use(
 app.use("/api/notes", requiresAuth, notesRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/etsy", etsyRoutes);
+app.use("/api/goProsvasis", goProsvasisRoutes);
 
 if (env.NODE_ENV === "production") {
   app.use(express.static("/app/client/build"));
