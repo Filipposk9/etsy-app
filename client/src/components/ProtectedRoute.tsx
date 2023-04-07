@@ -7,7 +7,7 @@ type Props = {
   children: JSX.Element;
 };
 const ProtectedRoute = ({ user, children }: Props): JSX.Element => {
-  if (!user) {
+  if (!user?.isAdmin) {
     return <Navigate to="/" replace />;
   }
   return children;

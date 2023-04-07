@@ -63,6 +63,7 @@ export const signUp: RequestHandler<
       username: username,
       email: email,
       password: passwordHashed,
+      isAdmin: false,
     });
 
     req.session.userId = newUser._id;
