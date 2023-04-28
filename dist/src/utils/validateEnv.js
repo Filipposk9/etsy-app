@@ -12,4 +12,5 @@ exports.default = (0, envalid_1.cleanEnv)(process.env, {
     ETSY_SHOP_ID: (0, validators_1.str)(),
     GO_PROSVASIS_APPID: (0, validators_1.str)(),
     GO_PROSVASIS_TOKEN: (0, validators_1.str)(),
+    GO_PROSVASIS_CODE: (0, validators_1.str)(),
 });

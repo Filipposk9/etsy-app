@@ -29,5 +29,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const GoProsvasisController = __importStar(require("../controllers/goProsvasis"));
 const router = express_1.default.Router();
-router.post("/", GoProsvasisController.getInvoices);
+router.post("/", GoProsvasisController.getOrders);
+router.post("/invoice", GoProsvasisController.generateInvoice);
 exports.default = router;
