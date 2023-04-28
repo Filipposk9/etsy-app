@@ -2,11 +2,12 @@ import { HTMLAttributes, useCallback } from "react";
 
 import OrderPriceEntry from "./OrderPriceEntry";
 import OrderInfoEntry from "./OrderInfoEntry";
+import OrderDetails from "./OrderDetails";
 
 import { calculateTotalOrderPrice } from "../utils/calculateTotalOrderPrice";
-
 import * as GoProsvasisApi from "../network/goProsvasis_api";
-import OrderDetails from "./OrderDetails";
+
+import { normalizeTransactions } from "../utils/normalizeTransactions";
 
 export type OrderType = {
   name: string;
@@ -54,12 +55,22 @@ const Order = ({
         zip,
         country_iso,
         subtotal,
+        transactions: normalizeTransactions(transactions),
       });
       console.log(invoice);
     } catch (error) {
       console.log(error);
     }
-  }, [buyer_email, city, country_iso, formatted_address, name, subtotal, zip]);
+  }, [
+    buyer_email,
+    city,
+    country_iso,
+    formatted_address,
+    name,
+    subtotal,
+    transactions,
+    zip,
+  ]);
 
   return (
     <li>

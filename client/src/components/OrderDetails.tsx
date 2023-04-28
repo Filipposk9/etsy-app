@@ -2,6 +2,12 @@ import { HTMLAttributes } from "react";
 
 export type Transaction = {
   title: string;
+  quantity: number;
+  price: {
+    amount: number;
+    divisor: number;
+  };
+  shop_coupon: number;
 };
 
 type Props = HTMLAttributes<HTMLDetailsElement> & {
