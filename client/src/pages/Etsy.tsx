@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import Orders from "../components/Orders";
+import OrdersCollection from "../components/OrdersCollection";
 
 import Spinner from "../components/Spinner";
 
@@ -113,7 +113,7 @@ const Etsy = (): JSX.Element | null => {
   if (token.access_token) {
     return (
       <div className="mt-16">
-        <Orders
+        <OrdersCollection
           orders={orders}
           onHandleRefreshButtonClick={handleGetDataClick}
         />

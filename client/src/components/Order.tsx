@@ -1,13 +1,20 @@
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, useCallback } from "react";
 
 import OrderPriceEntry from "./OrderPriceEntry";
 import OrderInfoEntry from "./OrderInfoEntry";
 
 import { calculateTotalOrderPrice } from "../utils/calculateTotalOrderPrice";
 
+import * as GoProsvasisApi from "../network/goProsvasis_api";
+import OrderDetails from "./OrderDetails";
+
 export type OrderType = {
   name: string;
+  buyer_email: string;
   formatted_address: string;
+  city: string;
+  zip: string;
+  country_iso: string;
   subtotal: {
     amount: number;
   };
@@ -18,18 +25,50 @@ export type OrderType = {
     amount: number;
   };
   receipt_id: number;
+  transactions: [];
 };
 
 type Props = HTMLAttributes<HTMLLIElement> & { order: OrderType };
 
 const Order = ({
-  order: { name, formatted_address, subtotal, gift_wrap_price, postage_price },
+  order: {
+    name,
+    buyer_email,
+    formatted_address,
+    city,
+    zip,
+    country_iso,
+    subtotal,
+    gift_wrap_price,
+    postage_price,
+    transactions,
+  },
 }: Props): JSX.Element => {
+  const handleGenerateInvoiceClick = useCallback(async () => {
+    try {
+      const invoice = await GoProsvasisApi.generateInvoice({
+        name,
+        buyer_email,
+        formatted_address,
+        city,
+        zip,
+        country_iso,
+        subtotal,
+      });
+      console.log(invoice);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [buyer_email, city, country_iso, formatted_address, name, subtotal, zip]);
+
   return (
     <li>
       <div className="min-h-36 bg-gray-900 text-white rounded-2xl p-2">
         <OrderInfoEntry text="Order by" value={name} />
-        <OrderInfoEntry text="Address" value={formatted_address} />
+        <OrderInfoEntry
+          text="Address"
+          value={formatted_address.replace(name, "")}
+        />
         <hr className="py-1" />
         <div>
           <OrderPriceEntry text="Subtotal" value={subtotal.amount} />
@@ -53,10 +92,13 @@ const Order = ({
           />
         </div>
         <hr className="py-1" />
+
+        <OrderDetails transactions={transactions} />
+
         <div className="flex justify-center">
           <button
             className="bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600"
-            onClick={() => {}}
+            onClick={handleGenerateInvoiceClick}
           >
             Generate Invoice
           </button>

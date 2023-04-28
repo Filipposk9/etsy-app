@@ -7,7 +7,7 @@ type Props = HTMLAttributes<HTMLDivElement> & {
   orders: Array<OrderType>;
   onHandleRefreshButtonClick: () => void;
 };
-const Orders = ({
+const OrdersCollection = ({
   orders,
   onHandleRefreshButtonClick,
 }: Props): JSX.Element | null => {
@@ -34,4 +34,4 @@ const Orders = ({
   );
 };
 
-export default Orders;
+export default OrdersCollection;
