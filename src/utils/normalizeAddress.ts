@@ -4,5 +4,5 @@ export function normalizeAddress(
 ): string {
   const normalizedAddress = formattedAddress.replace(`${name}\n`, "");
 
-  return normalizedAddress.replace("\n", " ");
+  return normalizedAddress.replace(/\n/g, " ");
 }

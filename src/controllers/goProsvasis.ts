@@ -47,8 +47,8 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
       CUSTOMER: [
         {
           // TODO: GIVE THE CORRECT CUSTOMER NAME INSTEAD OF DUMMY WHEN FINISHED
-          NAME: req.body.name,
-          // NAME: "ARIS TEST",
+          // NAME: req.body.name,
+          NAME: "ARIS TEST",
           EMAIL: req.body.buyer_email,
           ADDRESS: normalizeAddress(req.body.formatted_address, req.body.name),
           CITY: req.body.city,
@@ -81,7 +81,7 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
       data: {
         SALDOC: [
           {
-            SERIES: 7071,
+            SERIES: normalizeCountry(req.body.country_iso)?.isEu ? 7076 : 7071,
             TRDR: customer.data.id,
           },
         ],
@@ -96,6 +96,23 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
             MTRL_ITEM_CODE: 0,
           };
         }),
+        EXPANAL: [
+          req.body.shipping_upgrade
+            ? {
+                EXPN:
+                  2000 -
+                  (normalizeCountry(req.body.country_iso)?.deliveryCostVat ||
+                    0),
+                EXPVAL: normalizeCountry(req.body.country_iso)?.isEu
+                  ? 600
+                  : 10001,
+                EXPVATVAL: normalizeCountry(req.body.country_iso)?.isEu
+                  ? normalizeCountry(req.body.country_iso)?.deliveryCostVat
+                  : 0,
+                LINENUM: 1,
+              }
+            : null,
+        ],
         SRVLINES: [],
       },
     };
@@ -114,7 +131,7 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
 
     console.log("INVOICE CREATED: ", invoice.data);
 
-    res.status(200);
+    res.status(200).json({ success: true });
   } catch (error) {
     next(error);
   }

@@ -8,6 +8,8 @@ export type Transaction = {
     divisor: number;
   };
   shop_coupon: number;
+  shipping_upgrade: string | null;
+  expected_ship_date: number;
 };
 
 type Props = HTMLAttributes<HTMLDetailsElement> & {

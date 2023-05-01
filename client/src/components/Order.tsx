@@ -1,12 +1,12 @@
-import { HTMLAttributes, useCallback } from "react";
+import { HTMLAttributes, useCallback, useState } from "react";
 
 import OrderPriceEntry from "./OrderPriceEntry";
 import OrderInfoEntry from "./OrderInfoEntry";
-import OrderDetails from "./OrderDetails";
+import OrderDetails, { Transaction } from "./OrderDetails";
 
-import { calculateTotalOrderPrice } from "../utils/calculateTotalOrderPrice";
 import * as GoProsvasisApi from "../network/goProsvasis_api";
 
+import { calculateTotalOrderPrice } from "../utils/calculateTotalOrderPrice";
 import { normalizeTransactions } from "../utils/normalizeTransactions";
 
 export type OrderType = {
@@ -26,7 +26,7 @@ export type OrderType = {
     amount: number;
   };
   receipt_id: number;
-  transactions: [];
+  transactions: Transaction[];
 };
 
 type Props = HTMLAttributes<HTMLLIElement> & { order: OrderType };
@@ -45,7 +45,12 @@ const Order = ({
     transactions,
   },
 }: Props): JSX.Element => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [generateInvoiceSuccess, setGenerateInvoiceSuccess] = useState(false);
+
   const handleGenerateInvoiceClick = useCallback(async () => {
+    setIsLoading(true);
+    setGenerateInvoiceSuccess(false);
     try {
       const invoice = await GoProsvasisApi.generateInvoice({
         name,
@@ -56,11 +61,15 @@ const Order = ({
         country_iso,
         subtotal,
         transactions: normalizeTransactions(transactions),
+        shipping_upgrade: !!transactions[0].shipping_upgrade,
       });
+      setGenerateInvoiceSuccess(true);
       console.log(invoice);
     } catch (error) {
+      setGenerateInvoiceSuccess(false);
       console.log(error);
     }
+    setIsLoading(false);
   }, [
     buyer_email,
     city,
@@ -77,6 +86,12 @@ const Order = ({
       <div className="min-h-36 bg-gray-900 text-white rounded-2xl p-2">
         <OrderInfoEntry text="Order by" value={name} />
         <OrderInfoEntry
+          text="Expected Shipping Date"
+          value={new Date(
+            transactions[0].expected_ship_date * 1000
+          ).toLocaleDateString("en-GB")}
+        />
+        <OrderInfoEntry
           text="Address"
           value={formatted_address.replace(name, "")}
         />
@@ -87,6 +102,9 @@ const Order = ({
             text="Gift Wrap Price"
             value={gift_wrap_price.amount}
           />
+          {transactions[0].shipping_upgrade ? (
+            <OrderPriceEntry text="Express Delivery" value={2000} />
+          ) : null}
           {postage_price ? (
             <OrderPriceEntry
               text="Postage Price"
@@ -98,7 +116,8 @@ const Order = ({
             value={calculateTotalOrderPrice(
               subtotal.amount,
               gift_wrap_price.amount,
-              postage_price?.amount
+              postage_price?.amount,
+              !!transactions[0].shipping_upgrade
             )}
           />
         </div>
@@ -108,7 +127,8 @@ const Order = ({
 
         <div className="flex justify-center">
           <button
-            className="bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600"
+            className="bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-800"
+            disabled={isLoading || generateInvoiceSuccess}
             onClick={handleGenerateInvoiceClick}
           >
             Generate Invoice
