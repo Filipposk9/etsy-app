@@ -48,8 +48,8 @@ const generateInvoice = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             CUSTOMER: [
                 {
                     // TODO: GIVE THE CORRECT CUSTOMER NAME INSTEAD OF DUMMY WHEN FINISHED
-                    // NAME: req.body.name,
-                    NAME: "ARIS TEST",
+                    NAME: req.body.name,
+                    // NAME: "ARIS TEST",
                     EMAIL: req.body.buyer_email,
                     ADDRESS: (0, normalizeAddress_1.normalizeAddress)(req.body.formatted_address, req.body.name),
                     CITY: req.body.city,
@@ -104,7 +104,7 @@ const generateInvoice = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                                 : 0,
                             LINENUM: 1,
                         }
-                        : null,
+                        : {},
                 ],
                 SRVLINES: [],
             },

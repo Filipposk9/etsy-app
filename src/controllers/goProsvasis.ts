@@ -47,8 +47,8 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
       CUSTOMER: [
         {
           // TODO: GIVE THE CORRECT CUSTOMER NAME INSTEAD OF DUMMY WHEN FINISHED
-          // NAME: req.body.name,
-          NAME: "ARIS TEST",
+          NAME: req.body.name,
+          // NAME: "ARIS TEST",
           EMAIL: req.body.buyer_email,
           ADDRESS: normalizeAddress(req.body.formatted_address, req.body.name),
           CITY: req.body.city,
@@ -111,7 +111,7 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
                   : 0,
                 LINENUM: 1,
               }
-            : null,
+            : {},
         ],
         SRVLINES: [],
       },
