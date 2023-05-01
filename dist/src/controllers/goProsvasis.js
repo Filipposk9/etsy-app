@@ -39,7 +39,7 @@ const getOrders = (req, res, next) => __awaiter(void 0, void 0, void 0, function
 });
 exports.getOrders = getOrders;
 const generateInvoice = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     const customerRequestOptions = {
         appId: validateEnv_1.default.GO_PROSVASIS_APPID,
         filters: "",
@@ -82,7 +82,10 @@ const generateInvoice = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                 ITELINES: req.body.transactions.map((t, index) => {
                     return {
                         LINENUM: index + 1,
-                        LINEVAL: t.price,
+                        LINEVAL: t.price +
+                            (index === 0 && req.body.gift_wrap_price
+                                ? req.body.gift_wrap_price
+                                : 0),
                         MTRL: 75,
                         QTY1: t.quantity,
                         MTRUNIT: 101,
@@ -93,14 +96,16 @@ const generateInvoice = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                 EXPANAL: [
                     req.body.shipping_upgrade
                         ? {
-                            EXPN: 2000 -
-                                (((_e = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _e === void 0 ? void 0 : _e.deliveryCostVat) ||
-                                    0),
-                            EXPVAL: ((_f = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _f === void 0 ? void 0 : _f.isEu)
+                            EXPN: ((_e = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _e === void 0 ? void 0 : _e.isEu)
                                 ? 600
                                 : 10001,
-                            EXPVATVAL: ((_g = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _g === void 0 ? void 0 : _g.isEu)
-                                ? (_h = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _h === void 0 ? void 0 : _h.deliveryCostVat
+                            EXPVAL: ((_f = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _f === void 0 ? void 0 : _f.isEu)
+                                ? 20 -
+                                    (((_g = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _g === void 0 ? void 0 : _g.deliveryCostVat) ||
+                                        0)
+                                : 20,
+                            EXPVATVAL: ((_h = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _h === void 0 ? void 0 : _h.isEu)
+                                ? (_j = (0, normalizeCountry_1.normalizeCountry)(req.body.country_iso)) === null || _j === void 0 ? void 0 : _j.deliveryCostVat
                                 : 0,
                             LINENUM: 1,
                         }
@@ -116,7 +121,7 @@ const generateInvoice = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             },
         });
         console.log("INVOICE CREATED: ", invoice.data);
-        res.status(200).json({ success: true });
+        res.status(200).json({ data: invoice.data });
     }
     catch (error) {
         next(error);

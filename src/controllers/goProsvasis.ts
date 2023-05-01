@@ -88,7 +88,11 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
         ITELINES: req.body.transactions.map((t: Transaction, index: number) => {
           return {
             LINENUM: index + 1,
-            LINEVAL: t.price,
+            LINEVAL:
+              t.price +
+              (index === 0 && req.body.gift_wrap_price
+                ? req.body.gift_wrap_price
+                : 0),
             MTRL: 75,
             QTY1: t.quantity,
             MTRUNIT: 101,
@@ -99,13 +103,14 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
         EXPANAL: [
           req.body.shipping_upgrade
             ? {
-                EXPN:
-                  2000 -
-                  (normalizeCountry(req.body.country_iso)?.deliveryCostVat ||
-                    0),
-                EXPVAL: normalizeCountry(req.body.country_iso)?.isEu
+                EXPN: normalizeCountry(req.body.country_iso)?.isEu
                   ? 600
                   : 10001,
+                EXPVAL: normalizeCountry(req.body.country_iso)?.isEu
+                  ? 20 -
+                    (normalizeCountry(req.body.country_iso)?.deliveryCostVat ||
+                      0)
+                  : 20,
                 EXPVATVAL: normalizeCountry(req.body.country_iso)?.isEu
                   ? normalizeCountry(req.body.country_iso)?.deliveryCostVat
                   : 0,
@@ -131,7 +136,7 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
 
     console.log("INVOICE CREATED: ", invoice.data);
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ data: invoice.data });
   } catch (error) {
     next(error);
   }
