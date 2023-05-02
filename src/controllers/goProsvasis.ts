@@ -91,7 +91,7 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
             LINEVAL:
               t.price +
               (index === 0 && req.body.gift_wrap_price
-                ? req.body.gift_wrap_price
+                ? parseInt(req.body.gift_wrap_price, 10)
                 : 0),
             MTRL: 75,
             QTY1: t.quantity,

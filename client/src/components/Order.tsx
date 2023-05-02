@@ -21,6 +21,7 @@ export type OrderType = {
   };
   gift_wrap_price: {
     amount: number;
+    divisor: number;
   };
   postage_price?: {
     amount: number;
@@ -62,7 +63,7 @@ const Order = ({
         subtotal,
         transactions: normalizeTransactions(transactions),
         shipping_upgrade: !!transactions[0].shipping_upgrade,
-        gift_wrap_price: gift_wrap_price.amount,
+        gift_wrap_price: gift_wrap_price.amount / gift_wrap_price.divisor,
       });
       setGenerateInvoiceSuccess(true);
       console.log(invoice);
@@ -77,6 +78,7 @@ const Order = ({
     country_iso,
     formatted_address,
     gift_wrap_price.amount,
+    gift_wrap_price.divisor,
     name,
     subtotal,
     transactions,

@@ -84,7 +84,7 @@ const generateInvoice = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                         LINENUM: index + 1,
                         LINEVAL: t.price +
                             (index === 0 && req.body.gift_wrap_price
-                                ? req.body.gift_wrap_price
+                                ? parseInt(req.body.gift_wrap_price, 10)
                                 : 0),
                         MTRL: 75,
                         QTY1: t.quantity,
