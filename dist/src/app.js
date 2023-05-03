@@ -32,7 +32,6 @@ const express_1 = __importDefault(require("express"));
 const express_session_1 = __importDefault(require("express-session"));
 const http_errors_1 = __importStar(require("http-errors"));
 const morgan_1 = __importDefault(require("morgan"));
-const path_1 = __importDefault(require("path"));
 const notes_1 = __importDefault(require("./routes/notes"));
 const users_1 = __importDefault(require("./routes/users"));
 const etsy_1 = __importDefault(require("./routes/etsy"));
@@ -58,12 +57,13 @@ app.use("/api/notes", auth_1.requiresAuth, notes_1.default);
 app.use("/api/users", users_1.default);
 app.use("/api/etsy", etsy_1.default);
 app.use("/api/goProsvasis", goProsvasis_1.default);
-if (validateEnv_1.default.NODE_ENV === "production") {
-    app.use(express_1.default.static("/app/client/build"));
-    app.get("*", (req, res) => {
-        res.sendFile(path_1.default.resolve(__dirname, "/app/client", "build", "index.html"));
-    });
-}
+// if (env.NODE_ENV === "production") {
+//   app.use(express.static("/app/client/build"));
+//
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.resolve(__dirname, "/app/client", "build", "index.html"));
+//   });
+// }
 app.use((req, res, next) => {
     next((0, http_errors_1.default)(404, "Endpoint not found"));
 });
@@ -77,5 +77,12 @@ app.use((error, req, res, next) => {
         errorMessage = error.message;
     }
     res.status(statusCode).json({ error: errorMessage });
+});
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "https://etsy-acroj3a3z-avnikolaou.vercel.app");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
+    res.header("Access-Control-Allow-Credentials", "true");
+    next();
 });
 exports.default = app;

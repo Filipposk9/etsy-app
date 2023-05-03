@@ -41,13 +41,13 @@ app.use("/api/users", userRoutes);
 app.use("/api/etsy", etsyRoutes);
 app.use("/api/goProsvasis", goProsvasisRoutes);
 
-if (env.NODE_ENV === "production") {
-  app.use(express.static("/app/client/build"));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "/app/client", "build", "index.html"));
-  });
-}
+// if (env.NODE_ENV === "production") {
+//   app.use(express.static("/app/client/build"));
+//
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.resolve(__dirname, "/app/client", "build", "index.html"));
+//   });
+// }
 
 app.use((req, res, next) => {
   next(createHttpError(404, "Endpoint not found"));
@@ -64,6 +64,20 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
     errorMessage = error.message;
   }
   res.status(statusCode).json({ error: errorMessage });
+});
+
+app.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://etsy-acroj3a3z-avnikolaou.vercel.app"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Content-Length, X-Requested-With"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
 });
 
 export default app;
