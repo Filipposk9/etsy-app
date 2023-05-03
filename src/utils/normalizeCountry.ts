@@ -5,7 +5,7 @@ export function normalizeCountry(countryIso: string) {
 const countryCode = new Map([
   ["US", { code: 40, isEu: false }],
   ["AU", { code: 50, isEu: false }],
-  ["CA", { code: 20, isEu: false }],
+  ["CA", { code: 60, isEu: false }],
   ["CK", { code: 70, isEu: false }],
   ["HK", { code: 80, isEu: false }],
   ["PH", { code: 90, isEu: false }],
