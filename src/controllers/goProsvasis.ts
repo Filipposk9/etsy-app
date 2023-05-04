@@ -136,6 +136,12 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
 
     console.log("INVOICE CREATED: ", invoice.data);
 
+    // console.log("DATA: ", req.body);
+    // console.log("DOCUMENT: ", invoiceRequestOptions.data.SALDOC);
+    // console.log("ITEMS: ", invoiceRequestOptions.data.ITELINES);
+    // console.log("EXPENSES: ", invoiceRequestOptions.data.EXPANAL);
+    // res.status(200).json({});
+
     res.status(200).json({ data: invoice.data });
   } catch (error) {
     next(error);

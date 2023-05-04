@@ -132,13 +132,13 @@ const Order = ({
 
         <div className="flex justify-center">
           <button
-            className="bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-800"
+            className="w-36 bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-800"
             disabled={
               isLoading || !!localStorage.getItem(JSON.stringify(receipt_id))
             }
             onClick={handleGenerateInvoiceClick}
           >
-            Generate Invoice
+            {isLoading ? "Generating" : "Generate Invoice"}
           </button>
         </div>
       </div>
