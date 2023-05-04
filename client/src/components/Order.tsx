@@ -43,15 +43,14 @@ const Order = ({
     subtotal,
     gift_wrap_price,
     postage_price,
+    receipt_id,
     transactions,
   },
 }: Props): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
-  const [generateInvoiceSuccess, setGenerateInvoiceSuccess] = useState(false);
 
   const handleGenerateInvoiceClick = useCallback(async () => {
     setIsLoading(true);
-    setGenerateInvoiceSuccess(false);
     try {
       const invoice = await GoProsvasisApi.generateInvoice({
         name,
@@ -65,10 +64,11 @@ const Order = ({
         shipping_upgrade: !!transactions[0].shipping_upgrade,
         gift_wrap_price: gift_wrap_price.amount / gift_wrap_price.divisor,
       });
-      setGenerateInvoiceSuccess(true);
+      if (invoice.data.success) {
+        localStorage.setItem(JSON.stringify(receipt_id), "Done");
+      }
       console.log(invoice);
     } catch (error) {
-      setGenerateInvoiceSuccess(false);
       console.log(error);
     }
     setIsLoading(false);
@@ -80,6 +80,7 @@ const Order = ({
     gift_wrap_price.amount,
     gift_wrap_price.divisor,
     name,
+    receipt_id,
     subtotal,
     transactions,
     zip,
@@ -132,7 +133,9 @@ const Order = ({
         <div className="flex justify-center">
           <button
             className="bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-800"
-            disabled={isLoading || generateInvoiceSuccess}
+            disabled={
+              isLoading || !!localStorage.getItem(JSON.stringify(receipt_id))
+            }
             onClick={handleGenerateInvoiceClick}
           >
             Generate Invoice
