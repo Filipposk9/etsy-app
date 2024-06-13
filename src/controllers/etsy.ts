@@ -97,7 +97,7 @@ export const getData: RequestHandler = async (req, res, next) => {
     }
 
     const response = await axios.get(
-      `https://api.etsy.com/v3/application/shops/${env.ETSY_SHOP_ID}/receipts?was_shipped=false&sort_on=created&sort_order=asc&limit=75`,
+      `https://api.etsy.com/v3/application/shops/${env.ETSY_SHOP_ID}/receipts?&was_canceled=false&was_shipped=false&sort_on=created&sort_order=asc&limit=100`,
       {
         headers: {
           "x-api-key": env.ETSY_API_KEY,
@@ -105,6 +105,8 @@ export const getData: RequestHandler = async (req, res, next) => {
         },
       }
     );
+
+    console.log(response.data.count);
 
     res.status(200).json(response.data.results);
   } catch (error) {

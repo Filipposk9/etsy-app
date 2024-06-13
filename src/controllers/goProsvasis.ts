@@ -39,6 +39,7 @@ export const getOrders: RequestHandler = async (req, res, next) => {
 };
 
 export const generateInvoice: RequestHandler = async (req, res, next) => {
+  // console.log("FORM DATA: ", req.body);
   const customerRequestOptions = {
     appId: env.GO_PROSVASIS_APPID,
     filters: "",
@@ -74,6 +75,17 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
       }
     );
 
+    const deliveryCost = normalizeCountry(req.body.country_iso)?.isEu
+      ? (
+          req.body.total_shipping_cost /
+          (normalizeCountry(req.body.country_iso)?.deliveryCostVat || 0)
+        ).toFixed(2)
+      : req.body.total_shipping_cost;
+
+    const deliveryCostVat = normalizeCountry(req.body.country_iso)?.isEu
+      ? (req.body.total_shipping_cost - deliveryCost).toFixed(2)
+      : 0;
+
     const invoiceRequestOptions = {
       appId: env.GO_PROSVASIS_APPID,
       filters: "",
@@ -101,19 +113,13 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
           };
         }),
         EXPANAL: [
-          req.body.shipping_upgrade
+          req.body.total_shipping_cost !== 0
             ? {
                 EXPN: normalizeCountry(req.body.country_iso)?.isEu
                   ? 600
                   : 10001,
-                EXPVAL: normalizeCountry(req.body.country_iso)?.isEu
-                  ? 20 -
-                    (normalizeCountry(req.body.country_iso)?.deliveryCostVat ||
-                      0)
-                  : 20,
-                EXPVATVAL: normalizeCountry(req.body.country_iso)?.isEu
-                  ? normalizeCountry(req.body.country_iso)?.deliveryCostVat
-                  : 0,
+                EXPVAL: deliveryCost,
+                EXPVATVAL: deliveryCostVat,
                 LINENUM: 1,
               }
             : {},
@@ -134,15 +140,34 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
       }
     );
 
-    console.log("INVOICE CREATED: ", invoice.data);
+    const printOptions = {
+      appId: env.GO_PROSVASIS_APPID,
+      key: invoice.data.id,
+      token: env.GO_PROSVASIS_TOKEN,
+      service: "einvoice",
+    };
+
+    const print = await axios.post(
+      "https://go.s1cloud.net/s1services/set/saldoc",
+      printOptions,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          s1code: env.GO_PROSVASIS_CODE,
+        },
+      }
+    );
+
+    // console.log("INVOICE CREATED: ", invoice.data);
+    console.log("PRINT: ", print.data);
 
     // console.log("DATA: ", req.body);
     // console.log("DOCUMENT: ", invoiceRequestOptions.data.SALDOC);
     // console.log("ITEMS: ", invoiceRequestOptions.data.ITELINES);
     // console.log("EXPENSES: ", invoiceRequestOptions.data.EXPANAL);
-    // res.status(200).json({});
 
-    res.status(200).json({ data: invoice.data });
+    // res.status(200).json({});
+    res.status(200).json({ data: print.data });
   } catch (error) {
     next(error);
   }

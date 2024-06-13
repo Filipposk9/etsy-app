@@ -22,8 +22,8 @@ const OrderDetails = ({ transactions }: Props) => {
       <details>
         <summary>Ordered Items: {transactions.length}</summary>
         <ol className="px-4 my-1 space-y-2">
-          {transactions.map((t: any) => (
-            <li key={t.title} className="list-disc text-sm">
+          {transactions.map((t: any, index: number) => (
+            <li key={`${t.title} ${index}`} className="list-disc text-sm">
               {t.title}
             </li>
           ))}

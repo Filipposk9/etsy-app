@@ -9,6 +9,9 @@ import * as GoProsvasisApi from "../network/goProsvasis_api";
 import { calculateTotalOrderPrice } from "../utils/calculateTotalOrderPrice";
 import { normalizeTransactions } from "../utils/normalizeTransactions";
 
+import * as ReceiptsApi from "../network/receipts_api";
+import { normalizeCountry } from "../utils/normalizeCountry";
+
 export type OrderType = {
   name: string;
   buyer_email: string;
@@ -23,14 +26,22 @@ export type OrderType = {
     amount: number;
     divisor: number;
   };
-  postage_price?: {
+  total_shipping_cost: {
     amount: number;
+    divisor: number;
   };
   receipt_id: number;
   transactions: Transaction[];
+  weight: string;
+  itemDescription: string;
+  tariffNumber: string;
+  isChecked: boolean;
 };
 
-type Props = HTMLAttributes<HTMLLIElement> & { order: OrderType };
+type Props = HTMLAttributes<HTMLLIElement> & {
+  order: OrderType;
+  onOrderChange: (order: OrderType) => void;
+};
 
 const Order = ({
   order: {
@@ -42,12 +53,34 @@ const Order = ({
     country_iso,
     subtotal,
     gift_wrap_price,
-    postage_price,
+    total_shipping_cost,
     receipt_id,
     transactions,
   },
+  onOrderChange,
 }: Props): JSX.Element => {
+  const itemDescriptionOptions: {
+    [key: string]: string;
+  } = {
+    "WOODEN HOME DECOR ITEM": "4420909990",
+    FRANKINCENSE: "33074100",
+    "BRASS ARTWARE": "74082100",
+    "BEESWAX WICK": "3406000000",
+    "CHARCOAL TABLET": "44029000",
+  };
+
   const [isLoading, setIsLoading] = useState(false);
+  const [weight, setWeight] = useState("");
+  const [itemDescription, setItemDescription] = useState(
+    Object.keys(itemDescriptionOptions)[0]
+  );
+  const [tariffNumber, setTariffNumber] = useState(
+    itemDescriptionOptions[itemDescription]
+  );
+
+  const [isChecked, setIsChecked] = useState(false);
+
+  const [noInvoiceNrError, setNoInvoiceNrError] = useState(false);
 
   const handleGenerateInvoiceClick = useCallback(async () => {
     setIsLoading(true);
@@ -61,33 +94,82 @@ const Order = ({
         country_iso,
         subtotal,
         transactions: normalizeTransactions(transactions),
-        shipping_upgrade: !!transactions[0].shipping_upgrade,
         gift_wrap_price: gift_wrap_price.amount / gift_wrap_price.divisor,
+        total_shipping_cost:
+          total_shipping_cost.amount / total_shipping_cost.divisor,
       });
       if (invoice.data.success) {
-        localStorage.setItem(JSON.stringify(receipt_id), "Done");
+        localStorage.setItem(
+          JSON.stringify(receipt_id),
+          `${invoice.data.data.number}`
+        );
+
+        if (noInvoiceNrError) {
+          setNoInvoiceNrError(false);
+
+          const order = {
+            name: name,
+            buyer_email: buyer_email,
+            formatted_address: formatted_address,
+            city: city,
+            zip: zip,
+            country_iso: country_iso,
+            subtotal: subtotal,
+            gift_wrap_price: gift_wrap_price,
+            total_shipping_cost: total_shipping_cost,
+            receipt_id: receipt_id,
+            transactions: transactions,
+            weight: weight,
+            itemDescription: itemDescription,
+            tariffNumber: tariffNumber,
+            isChecked: isChecked,
+          };
+
+          if (isChecked) {
+            onOrderChange(order);
+          }
+        }
+
+        try {
+          const receipt = await ReceiptsApi.createReceipt({
+            receiptId: receipt_id,
+            legalDocSeries: invoice.data.data.series,
+            legalDocNumber: invoice.data.data.number,
+          });
+
+          console.log(receipt);
+        } catch (error) {
+          console.log(error);
+        }
       }
       console.log(invoice);
     } catch (error) {
       console.log(error);
     }
+
     setIsLoading(false);
   }, [
     buyer_email,
     city,
     country_iso,
     formatted_address,
-    gift_wrap_price.amount,
-    gift_wrap_price.divisor,
+    gift_wrap_price,
     name,
+    total_shipping_cost,
     receipt_id,
     subtotal,
     transactions,
     zip,
+    itemDescription,
+    onOrderChange,
+    tariffNumber,
+    weight,
+    noInvoiceNrError,
+    isChecked,
   ]);
 
   return (
-    <li>
+    <li className="my-2">
       <div className="min-h-36 bg-gray-900 text-white rounded-2xl p-2">
         <OrderInfoEntry text="Order by" value={name} />
         <OrderInfoEntry
@@ -108,12 +190,12 @@ const Order = ({
             value={gift_wrap_price.amount}
           />
           {transactions[0].shipping_upgrade ? (
-            <OrderPriceEntry text="Express Delivery" value={2000} />
+            <OrderInfoEntry text="Express Delivery" value={"Yes"} />
           ) : null}
-          {postage_price ? (
+          {total_shipping_cost ? (
             <OrderPriceEntry
-              text="Postage Price"
-              value={postage_price.amount}
+              text="Total Shipping Cost"
+              value={total_shipping_cost.amount}
             />
           ) : null}
           <OrderPriceEntry
@@ -121,8 +203,7 @@ const Order = ({
             value={calculateTotalOrderPrice(
               subtotal.amount,
               gift_wrap_price.amount,
-              postage_price?.amount,
-              !!transactions[0].shipping_upgrade
+              total_shipping_cost?.amount
             )}
           />
         </div>
@@ -132,7 +213,9 @@ const Order = ({
 
         <div className="flex justify-center">
           <button
-            className="w-36 bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-800"
+            className={`w-36 bg-gray-800 text-white rounded-md px-3 py-2 ml-2 text-sm font-medium hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-800 ${
+              isChecked && noInvoiceNrError ? "border border-red-500" : ""
+            }`}
             disabled={
               isLoading || !!localStorage.getItem(JSON.stringify(receipt_id))
             }
@@ -140,6 +223,128 @@ const Order = ({
           >
             {isLoading ? "Generating" : "Generate Invoice"}
           </button>
+
+          <div>
+            <label className="ml-4">Βάρος: </label>
+            <input
+              type="text"
+              className="text-black my-1 w-16 ml-4"
+              value={weight}
+              pattern="[0-9]+([,][0-9]{0,2})?"
+              onChange={async (e) => {
+                if (/^[0-9]*\,?[0-9]{0,2}$/.test(e.target.value)) {
+                  setWeight(e.target.value);
+
+                  const order = {
+                    name: name,
+                    buyer_email: buyer_email,
+                    formatted_address: formatted_address,
+                    city: city,
+                    zip: zip,
+                    country_iso: country_iso,
+                    subtotal: subtotal,
+                    gift_wrap_price: gift_wrap_price,
+                    total_shipping_cost: total_shipping_cost,
+                    receipt_id: receipt_id,
+                    transactions: transactions,
+                    weight: e.target.value,
+                    itemDescription: itemDescription,
+                    tariffNumber: tariffNumber,
+                    isChecked: isChecked,
+                  };
+
+                  const receipt = await ReceiptsApi.getReceipt(
+                    order.receipt_id
+                  );
+
+                  if (Object.keys(receipt).length > 0) {
+                    onOrderChange(order);
+                  }
+                }
+              }}
+            ></input>
+          </div>
+
+          <div>
+            <label className="ml-4">Item Description: </label>
+            <select
+              className="w-46 bg-gray-800 rounded-md px-3 py-2 ml-2 font-medium hover:bg-gray-600"
+              onChange={async (e) => {
+                setItemDescription(e.target.value);
+                setTariffNumber(itemDescriptionOptions[e.target.value]);
+
+                const order = {
+                  name: name,
+                  buyer_email: buyer_email,
+                  formatted_address: formatted_address,
+                  city: city,
+                  zip: zip,
+                  country_iso: country_iso,
+                  subtotal: subtotal,
+                  gift_wrap_price: gift_wrap_price,
+                  total_shipping_cost: total_shipping_cost,
+                  receipt_id: receipt_id,
+                  transactions: transactions,
+                  weight: weight,
+                  itemDescription: e.target.value,
+                  tariffNumber: itemDescriptionOptions[e.target.value],
+                  isChecked: isChecked,
+                };
+
+                const receipt = await ReceiptsApi.getReceipt(order.receipt_id);
+
+                if (Object.keys(receipt).length > 0) {
+                  onOrderChange(order);
+                }
+              }}
+            >
+              {Object.keys(itemDescriptionOptions).map((item) => {
+                return (
+                  <option
+                    disabled={normalizeCountry(country_iso)?.isEu}
+                    value={item}
+                  >
+                    {item}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <label className="ml-4">Έκδοση Voucher: </label>
+          <input
+            className="my-1 w-12"
+            type="checkbox"
+            onChange={async (e) => {
+              setIsChecked(e.target.checked);
+
+              const order = {
+                name: name,
+                buyer_email: buyer_email,
+                formatted_address: formatted_address,
+                city: city,
+                zip: zip,
+                country_iso: country_iso,
+                subtotal: subtotal,
+                gift_wrap_price: gift_wrap_price,
+                total_shipping_cost: total_shipping_cost,
+                receipt_id: receipt_id,
+                transactions: transactions,
+                weight: weight,
+                itemDescription: itemDescription,
+                tariffNumber: tariffNumber,
+                isChecked: e.target.checked,
+              };
+
+              const receipt = await ReceiptsApi.getReceipt(order.receipt_id);
+
+              if (!noInvoiceNrError && Object.keys(receipt).length > 0) {
+                onOrderChange(order);
+              } else {
+                setNoInvoiceNrError(true);
+              }
+            }}
+          ></input>
         </div>
       </div>
     </li>
