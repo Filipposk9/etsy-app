@@ -21,6 +21,7 @@ export type OrderType = {
   country_iso: string;
   subtotal: {
     amount: number;
+    currency_code: string;
   };
   gift_wrap_price: {
     amount: number;
@@ -174,9 +175,17 @@ const Order = ({
         <OrderInfoEntry text="Order by" value={name} />
         <OrderInfoEntry
           text="Expected Shipping Date"
-          value={new Date(
-            transactions[0].expected_ship_date * 1000
-          ).toLocaleDateString("en-GB")}
+          value={
+            Object.prototype.toString.call(
+              transactions[0].expected_ship_date
+            ) === "[object Date]"
+              ? new Date(transactions[0].expected_ship_date).toLocaleDateString(
+                  "en-GB"
+                )
+              : new Date(
+                  transactions[0].expected_ship_date * 1000
+                ).toLocaleDateString("en-GB")
+          }
         />
         <OrderInfoEntry
           text="Address"
@@ -184,10 +193,15 @@ const Order = ({
         />
         <hr className="py-1" />
         <div>
-          <OrderPriceEntry text="Subtotal" value={subtotal.amount} />
+          <OrderPriceEntry
+            text="Subtotal"
+            value={subtotal.amount}
+            currency={subtotal.currency_code}
+          />
           <OrderPriceEntry
             text="Gift Wrap Price"
             value={gift_wrap_price.amount}
+            currency={subtotal.currency_code}
           />
           {transactions[0].shipping_upgrade ? (
             <OrderInfoEntry text="Express Delivery" value={"Yes"} />
@@ -196,6 +210,7 @@ const Order = ({
             <OrderPriceEntry
               text="Total Shipping Cost"
               value={total_shipping_cost.amount}
+              currency={subtotal.currency_code}
             />
           ) : null}
           <OrderPriceEntry
@@ -205,6 +220,7 @@ const Order = ({
               gift_wrap_price.amount,
               total_shipping_cost?.amount
             )}
+            currency={subtotal.currency_code}
           />
         </div>
         <hr className="py-1" />
@@ -301,6 +317,7 @@ const Order = ({
               {Object.keys(itemDescriptionOptions).map((item) => {
                 return (
                   <option
+                    key={item}
                     disabled={normalizeCountry(country_iso)?.isEu}
                     value={item}
                   >
