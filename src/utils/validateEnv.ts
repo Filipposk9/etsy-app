@@ -9,6 +9,7 @@ export default cleanEnv(process.env, {
   ETSY_AUTH_CALLBACK: str(),
   ETSY_API_KEY: str(),
   ETSY_SHOP_ID: str(),
+  SHOPIFY_ACCESS_TOKEN: str(),
   GO_PROSVASIS_APPID: str(),
   GO_PROSVASIS_TOKEN: str(),
   GO_PROSVASIS_CODE: str(),
