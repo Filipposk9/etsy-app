@@ -12,6 +12,7 @@ import NotFound from "../pages/NotFound";
 
 import { User } from "../models/user";
 import * as UsersApi from "../network/user_api";
+import Shopify from "../pages/Shopify";
 
 const Dashboard = () => {
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
@@ -59,6 +60,14 @@ const Dashboard = () => {
           element={
             <ProtectedRoute user={loggedInUser}>
               <EtsyCallback />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shopify"
+          element={
+            <ProtectedRoute user={loggedInUser}>
+              <Shopify />
             </ProtectedRoute>
           }
         />

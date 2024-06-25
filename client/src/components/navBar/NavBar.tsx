@@ -85,7 +85,10 @@ const NavBar = ({
                 {/*Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
                 <NavBarLink route="/" text="Home" />
                 {loggedInUser?.isAdmin ? (
-                  <NavBarLink route="/etsy" text="Etsy" />
+                  <>
+                    <NavBarLink route="/etsy" text="Etsy" />
+                    <NavBarLink route="/shopify" text="Shopify" />
+                  </>
                 ) : null}
               </div>
             </div>
