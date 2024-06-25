@@ -9,6 +9,7 @@ import path from "path";
 import notesRoutes from "./routes/notes";
 import userRoutes from "./routes/users";
 import etsyRoutes from "./routes/etsy";
+import shopifyRoutes from "./routes/shopify";
 import goProsvasisRoutes from "./routes/goProsvasis";
 import receiptsRoutes from "./routes/receipts";
 
@@ -40,6 +41,7 @@ app.use(
 app.use("/api/notes", requiresAuth, notesRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/etsy", etsyRoutes);
+app.use("/api/shopify", shopifyRoutes);
 app.use("/api/goProsvasis", goProsvasisRoutes);
 app.use("/api/receipts", receiptsRoutes);
 
