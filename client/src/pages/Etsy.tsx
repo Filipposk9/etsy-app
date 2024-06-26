@@ -12,6 +12,7 @@ import { OrderType } from "../components/Order";
 import * as ReceiptsApi from "../network/receipts_api";
 import { normalizeCountry } from "../utils/normalizeCountry";
 import { createVoucher } from "../utils/createVoucher";
+import { generateELTACSVHeader, generateELTACSVTail } from "../utils/csvUtils";
 
 const Etsy = (): JSX.Element | null => {
   const [credentials, setCredentials] = useState<EtsyCredentialsModel>();
@@ -111,74 +112,7 @@ const Etsy = (): JSX.Element | null => {
   const handleCreateVoucherClick = useCallback(async () => {
     async function createVouchers() {
       if (checkedOrders.length > 0) {
-        const csvHeader = [
-          "Country",
-          "Service",
-          "ID",
-          "Given Name",
-          "Surname",
-          "Organisation Name",
-          "Registration Number",
-          "Pick Up Point",
-          "Parcel Locker",
-          "Street Name",
-          "Street Number",
-          "Extension",
-          "Street Specification",
-          "Postal Code",
-          "District Number",
-          "Town",
-          "Region / State",
-          "District",
-          "County",
-          "Telephone Number",
-          "Email",
-          "Reference No",
-          "Weight (in Kg)",
-          "Length (in cm)",
-          "Width (in cm)",
-          "Height (in cm)",
-          "Quantity",
-          "COD (In €)",
-          "Insured Value (In €)",
-          "Gift",
-          "Documents",
-          "Commercial sample",
-          "Returned goods",
-          "Sale Of Goods",
-          "Other",
-          "Explanation",
-          "Detailed description of contents",
-          "Quantity",
-          "Net weight (in Kg)",
-          "Value (in €)",
-          "HS tariff number",
-          "Country of origin of goods",
-          "Detailed description of contents",
-          "Quantity",
-          "Net weight (in Kg)",
-          "Value (in €)",
-          "HS tariff number",
-          "Country of origin of goods",
-          "Detailed description of contents",
-          "Quantity",
-          "Net weight (in Kg)",
-          "Value (in €)",
-          "HS tariff number",
-          "Country of origin of goods",
-          "Detailed description of contents",
-          "Quantity",
-          "Net weight (in Kg)",
-          "Value (in €)",
-          "HS tariff number",
-          "Country of origin of goods",
-          "Comments",
-          "Importer's reference",
-          "Importer's telephone/fax/e-mail",
-          "Licence No(s)",
-          "Certificate No(s)",
-          "Invoice No(s)",
-        ].join(";");
+        const csvHeader = generateELTACSVHeader();
 
         const csvLinesPromises = checkedOrders.map(async (order) => {
           const countryIsEu = normalizeCountry(order.country_iso)?.isEu;
@@ -187,9 +121,7 @@ const Etsy = (): JSX.Element | null => {
 
           const receipt = await ReceiptsApi.getReceipt(order.receipt_id);
 
-          const tail = !countryIsEu
-            ? ";".repeat(30) + receipt.legalDocNumber
-            : ";".repeat(36);
+          const tail = generateELTACSVTail(countryIsEu, receipt.legalDocNumber);
 
           const csvLine = `${voucher}${tail}`;
 
