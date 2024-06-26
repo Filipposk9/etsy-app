@@ -94,7 +94,10 @@ const Order = ({
         zip,
         country_iso,
         subtotal,
-        transactions: normalizeTransactions(transactions),
+        transactions: normalizeTransactions(
+          transactions,
+          subtotal.currency_code
+        ),
         gift_wrap_price: gift_wrap_price.amount / gift_wrap_price.divisor,
         total_shipping_cost:
           total_shipping_cost.amount / total_shipping_cost.divisor,
