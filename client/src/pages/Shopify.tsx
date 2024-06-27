@@ -81,7 +81,7 @@ const Shopify = (): JSX.Element | null => {
         const csvLinesPromises = checkedOrders.map(async (order) => {
           const countryIsEu = normalizeCountry(order.country_iso)?.isEu;
 
-          const voucher = createVoucher(order);
+          const voucher = createVoucher(order, countryIsEu);
 
           const receipt = await ReceiptsApi.getReceipt(order.receipt_id);
 
