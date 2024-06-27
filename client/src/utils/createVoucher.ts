@@ -1,8 +1,4 @@
-import { normalizeCountry } from "./normalizeCountry";
-
-export function createVoucher(order: any) {
-  const countryIsEu = normalizeCountry(order.country_iso)?.isEu;
-
+export function createVoucher(order: any, countryIsEu: boolean | undefined) {
   const totalValue =
     order.subtotal.amount / order.subtotal.divisor +
     order.gift_wrap_price.amount / order.gift_wrap_price.divisor +
@@ -44,6 +40,8 @@ export function createVoucher(order: any) {
     }
   }
 
+  const phone = order.phone && order.phone !== null ? order.phone : "";
+
   let zip = order.zip;
 
   if (/\d/.test(order.zip)) {
@@ -55,81 +53,93 @@ export function createVoucher(order: any) {
     zip = zip.toString().replace(",", " ");
   }
 
-  const address = order.formatted_address.split("\n")[1];
-
   let organization = "";
   let streetName = "";
   let town = "";
 
-  if (address.length > 30) {
-    const words: string[] = address.split(" ");
-    const organizationArray: string[] = [];
-    let totalLength: number = 0;
+  if (order.address1 !== "") {
+    streetName = order.address1;
 
-    for (const word of words) {
-      if (totalLength + word.length <= 35) {
-        organizationArray.push(word);
-        totalLength += word.length + 1;
-      }
+    if (order.address2 !== null && order.address2 !== "") {
+      organization = order.address2;
     }
 
-    organization = organizationArray.join(" ");
-
-    streetName = words.slice(organizationArray.length - 1).join(" ");
-
-    if (streetName.length > 30) {
-      town =
-        streetName.split(",")[1] + " " + order.formatted_address.split("\n")[2];
-      streetName = streetName.split(",")[0];
-    } else {
-      town = order.formatted_address.split("\n")[2];
-    }
+    town = `${order.city} ${order.province_code}`;
   } else {
-    streetName = address;
+    const address = order.formatted_address.split("\n")[1];
 
-    if (order.formatted_address.split("\n").length >= 5) {
-      let townWithPostalCode = order.formatted_address.replace(",\n", "");
+    if (address.length > 30) {
+      const words: string[] = address.split(" ");
+      const organizationArray: string[] = [];
+      let totalLength: number = 0;
 
-      townWithPostalCode = townWithPostalCode.split("\n")[3].split(" ");
-
-      let totalString = "";
-
-      for (let i = 0; i < townWithPostalCode.length; i++) {
-        let currentElement = townWithPostalCode[i];
-
-        if (/\d/.test(currentElement)) {
-        } else {
-          totalString += currentElement + " ";
+      for (const word of words) {
+        if (totalLength + word.length <= 35) {
+          organizationArray.push(word);
+          totalLength += word.length + 1;
         }
       }
 
-      town = totalString;
+      organization = organizationArray.join(" ");
 
-      let newStreetname =
-        streetName + " " + order.formatted_address.split("\n")[2];
+      streetName = words.slice(organizationArray.length - 1).join(" ");
 
-      if (newStreetname.length > 30 && organization === "") {
-        organization = order.formatted_address.split("\n")[2];
+      if (streetName.length > 30) {
+        town =
+          streetName.split(",")[1] +
+          " " +
+          order.formatted_address.split("\n")[2];
+        streetName = streetName.split(",")[0];
       } else {
-        streetName = newStreetname;
+        town = order.formatted_address.split("\n")[2];
       }
     } else {
-      let townWithPostalCode = order.formatted_address.replace(",\n", "");
+      streetName = address;
 
-      townWithPostalCode = townWithPostalCode.split("\n")[2].split(" ");
+      if (order.formatted_address.split("\n").length >= 5) {
+        let townWithPostalCode = order.formatted_address.replace(",\n", "");
 
-      let totalString = "";
+        townWithPostalCode = townWithPostalCode.split("\n")[3].split(" ");
 
-      for (let i = 0; i < townWithPostalCode.length; i++) {
-        let currentElement = townWithPostalCode[i];
+        let totalString = "";
 
-        if (/\d/.test(currentElement)) {
-        } else {
-          totalString += currentElement + " ";
+        for (let i = 0; i < townWithPostalCode.length; i++) {
+          let currentElement = townWithPostalCode[i];
+
+          if (/\d/.test(currentElement)) {
+          } else {
+            totalString += currentElement + " ";
+          }
         }
-      }
 
-      town = totalString;
+        town = totalString;
+
+        let newStreetname =
+          streetName + " " + order.formatted_address.split("\n")[2];
+
+        if (newStreetname.length > 30 && organization === "") {
+          organization = order.formatted_address.split("\n")[2];
+        } else {
+          streetName = newStreetname;
+        }
+      } else {
+        let townWithPostalCode = order.formatted_address.replace(",\n", "");
+
+        townWithPostalCode = townWithPostalCode.split("\n")[2].split(" ");
+
+        let totalString = "";
+
+        for (let i = 0; i < townWithPostalCode.length; i++) {
+          let currentElement = townWithPostalCode[i];
+
+          if (/\d/.test(currentElement)) {
+          } else {
+            totalString += currentElement + " ";
+          }
+        }
+
+        town = totalString;
+      }
     }
   }
 
@@ -193,7 +203,7 @@ export function createVoucher(order: any) {
         "Region/State": "",
         District: "",
         County: "",
-        Telephone: "",
+        Telephone: phone,
         Email: "byzholyart@gmail.com",
         "Reference No": "",
         "Weight (in Kg)": order.weight,
@@ -239,7 +249,7 @@ export function createVoucher(order: any) {
         "Region/State": "",
         District: "",
         County: "",
-        Telephone: "",
+        Telephone: phone,
         Email: "byzholyart@gmail.com",
         "Reference No": "",
         "Weight (in Kg)": order.weight,
