@@ -15,9 +15,13 @@ import { normalizeCountry } from "../utils/normalizeCountry";
 export type OrderType = {
   name: string;
   buyer_email: string;
+  address1: string;
+  address2: string;
   formatted_address: string;
+  phone: string;
   city: string;
   zip: string;
+  province_code: string;
   country_iso: string;
   subtotal: {
     amount: number;
@@ -48,9 +52,13 @@ const Order = ({
   order: {
     name,
     buyer_email,
+    address1,
+    address2,
     formatted_address,
+    phone,
     city,
     zip,
+    province_code,
     country_iso,
     subtotal,
     gift_wrap_price,
@@ -114,9 +122,13 @@ const Order = ({
           const order = {
             name: name,
             buyer_email: buyer_email,
+            address1: address1,
+            address2: address2,
             formatted_address: formatted_address,
+            phone: phone,
             city: city,
             zip: zip,
+            province_code: province_code,
             country_iso: country_iso,
             subtotal: subtotal,
             gift_wrap_price: gift_wrap_price,
@@ -257,9 +269,13 @@ const Order = ({
                   const order = {
                     name: name,
                     buyer_email: buyer_email,
+                    address1: address1,
+                    address2: address2,
                     formatted_address: formatted_address,
+                    phone: phone,
                     city: city,
                     zip: zip,
+                    province_code: province_code,
                     country_iso: country_iso,
                     subtotal: subtotal,
                     gift_wrap_price: gift_wrap_price,
@@ -295,9 +311,13 @@ const Order = ({
                 const order = {
                   name: name,
                   buyer_email: buyer_email,
+                  address1: address1,
+                  address2: address2,
                   formatted_address: formatted_address,
+                  phone: phone,
                   city: city,
                   zip: zip,
+                  province_code: province_code,
                   country_iso: country_iso,
                   subtotal: subtotal,
                   gift_wrap_price: gift_wrap_price,
@@ -341,9 +361,13 @@ const Order = ({
               const order = {
                 name: name,
                 buyer_email: buyer_email,
+                address1: address1,
+                address2: address2,
                 formatted_address: formatted_address,
+                phone: phone,
                 city: city,
                 zip: zip,
+                province_code: province_code,
                 country_iso: country_iso,
                 subtotal: subtotal,
                 gift_wrap_price: gift_wrap_price,
