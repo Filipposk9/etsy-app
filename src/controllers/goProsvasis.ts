@@ -95,6 +95,7 @@ export const generateInvoice: RequestHandler = async (req, res, next) => {
           {
             SERIES: normalizeCountry(req.body.country_iso)?.isEu ? 7076 : 7071,
             TRDR: customer.data.id,
+            PAYMENT: 800,
           },
         ],
         ITELINES: req.body.transactions.map((t: Transaction, index: number) => {
