@@ -1,44 +1,9 @@
 export function createVoucher(order: any, countryIsEu: boolean | undefined) {
-  const totalValue =
-    order.subtotal.amount / order.subtotal.divisor +
-    order.gift_wrap_price.amount / order.gift_wrap_price.divisor +
-    order.total_shipping_cost.amount / order.total_shipping_cost.divisor;
-
-  let service = 0;
-
-  if (order.country_iso === "AU") {
-    if (order.gift_wrap_price.amount > 0) {
-      service = 853;
-    } else if (order.subtotal.amount / order.subtotal.divisor > 70) {
-      service = 853;
-    } else {
-      service = 851;
-    }
-  } else if (order.country_iso === "CA") {
-    if (order.gift_wrap_price.amount > 0) {
-      service = 854;
-    } else if (order.subtotal.amount / order.subtotal.divisor < 30) {
-      service = 851;
-    } else {
-      service = 854;
-    }
-  } else if (order.country_iso === "US") {
-    if (order.gift_wrap_price.amount > 0) {
-      service = 853;
-    } else if (order.subtotal.amount / order.subtotal.divisor < 30) {
-      service = 851;
-    } else {
-      service = 853;
-    }
-  } else {
-    if (order.gift_wrap_price.amount > 0) {
-      service = 854;
-    } else if (order.subtotal.amount / order.subtotal.divisor < 30) {
-      service = 851;
-    } else {
-      service = 854;
-    }
-  }
+  const service = determineService(
+    order.country_iso,
+    order.gift_wrap_price,
+    order.subtotal
+  );
 
   const phone = order.phone && order.phone !== null ? order.phone : "";
 
@@ -182,93 +147,94 @@ export function createVoucher(order: any, countryIsEu: boolean | undefined) {
   streetName = latinizeWord(streetName);
   town = latinizeWord(town);
 
-  const voucher = !countryIsEu
-    ? {
-        Country: order.country_iso,
-        Service: service,
-        ID: "",
-        "Given Name": name,
-        Surname: surname,
-        "Organisation Name": organization, //TODO: use only if name does not fit //length 35
-        "Registration Number": "",
-        "Pick Up Point": "",
-        "Parcel Locker": "",
-        "Street Name": streetName,
-        "Street Number": "-",
-        Extension: "",
-        "Street Specification": "",
-        "Postal Code": zip,
-        "District Number": "",
-        Town: town,
-        "Region/State": "",
-        District: "",
-        County: "",
-        Telephone: phone,
-        Email: "byzholyart@gmail.com",
-        "Reference No": "",
-        "Weight (in Kg)": order.weight,
-        "Length (in cm)": "",
-        "Width (in cm)": "",
-        "Height (in cm)": "",
-        Quantity: 1,
-        COD: "",
-        "Insured Value": "",
-        Gift: "",
-        Documents: "",
-        "Commercial Sample": "",
-        "Returned Goods": "",
-        "Sale Of Goods": 1,
-        Other: "",
-        Explanation: "",
-        "Detailed description of contents": order.itemDescription,
-        Quantity1: "1",
-        "Net weight (in Kg)": order.weight,
-        "Value (in €)": !countryIsEu
-          ? totalValue.toString().replace(".", ",")
-          : "",
-        "HS tariff number": order.tariffNumber,
-        "Country of origin of goods": "GR",
-      }
-    : {
-        Country: order.country_iso,
-        Service: service,
-        ID: "",
-        "Given Name": name,
-        Surname: surname,
-        "Organisation Name": organization, //TODO: use only if name does not fit //length 35
-        "Registration Number": "",
-        "Pick Up Point": "",
-        "Parcel Locker": "",
-        "Street Name": streetName,
-        "Street Number": "-",
-        Extension: "",
-        "Street Specification": "",
-        "Postal Code": zip,
-        "District Number": "",
-        Town: town,
-        "Region/State": "",
-        District: "",
-        County: "",
-        Telephone: phone,
-        Email: "byzholyart@gmail.com",
-        "Reference No": "",
-        "Weight (in Kg)": order.weight,
-        "Length (in cm)": "",
-        "Width (in cm)": "",
-        "Height (in cm)": "",
-        Quantity: 1,
-        COD: "",
-        "Insured Value": "",
-        Gift: "",
-        Documents: "",
-        "Commercial Sample": "",
-        "Returned Goods": "",
-        "Sale Of Goods": 1,
-        Other: "",
-        Explanation: "",
-      };
+  const totalValue =
+    order.subtotal.amount / order.subtotal.divisor +
+    order.gift_wrap_price.amount / order.gift_wrap_price.divisor +
+    order.total_shipping_cost.amount / order.total_shipping_cost.divisor;
+
+  const baseVoucher = {
+    Country: order.country_iso,
+    Service: service,
+    ID: "",
+    "Given Name": name,
+    Surname: surname,
+    "Organisation Name": organization, //TODO: use only if name does not fit //length 35
+    "Registration Number": "",
+    "Pick Up Point": "",
+    "Parcel Locker": "",
+    "Street Name": streetName,
+    "Street Number": "-",
+    Extension: "",
+    "Street Specification": "",
+    "Postal Code": zip,
+    "District Number": "",
+    Town: town,
+    "Region/State": "",
+    District: "",
+    County: "",
+    Telephone: phone,
+    Email: "byzholyart@gmail.com",
+    "Reference No": "",
+    "Weight (in Kg)": order.weight,
+    "Length (in cm)": "",
+    "Width (in cm)": "",
+    "Height (in cm)": "",
+    Quantity: 1,
+    COD: "",
+    "Insured Value": "",
+    Gift: "",
+    Documents: "",
+    "Commercial Sample": "",
+    "Returned Goods": "",
+    "Sale Of Goods": 1,
+    Other: "",
+    Explanation: "",
+  };
+
+  const nonEuSpecificFields = {
+    "Detailed description of contents": order.itemDescription,
+    Quantity1: "1",
+    "Net weight (in Kg)": order.weight,
+    "Value (in €)": totalValue.toString().replace(".", ","),
+    "HS tariff number": order.tariffNumber,
+    "Country of origin of goods": "GR",
+  };
+
+  const voucher = countryIsEu
+    ? { ...baseVoucher }
+    : { ...baseVoucher, ...nonEuSpecificFields };
 
   return Object.values(voucher).join(";").replace(/"/g, "");
+}
+
+const service = new Map([
+  ["AU", { giftWrap: 853, highSubtotal: 853, lowSubtotal: 851, threshold: 70 }],
+  ["CA", { giftWrap: 854, highSubtotal: 854, lowSubtotal: 851, threshold: 30 }],
+  ["US", { giftWrap: 853, highSubtotal: 853, lowSubtotal: 851, threshold: 30 }],
+  [
+    "default",
+    { giftWrap: 854, highSubtotal: 854, lowSubtotal: 851, threshold: 30 },
+  ],
+]);
+
+function determineService(
+  countryIso: string,
+  giftWrapPrice: any,
+  subtotal: any
+) {
+  const serviceCode = service.get(countryIso) || service.get("default");
+
+  if (serviceCode) {
+    const subtotalAmount = subtotal.amount / subtotal.divisor;
+
+    if (giftWrapPrice.amount > 0) {
+      return serviceCode.giftWrap;
+    } else if (subtotalAmount > serviceCode.threshold) {
+      return serviceCode.highSubtotal;
+    } else {
+      return serviceCode.lowSubtotal;
+    }
+  }
 }
 
 function latinizeWord(word: string): string {
