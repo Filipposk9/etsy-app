@@ -22,7 +22,7 @@ export function createVoucher(order: any, countryIsEu: boolean | undefined) {
   let streetName = "";
   let town = "";
 
-  if (order.address1 !== "") {
+  if (order.address1 && order.address1 !== "") {
     streetName = order.address1;
 
     if (order.address2 !== null && order.address2 !== "") {
