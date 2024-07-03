@@ -32,7 +32,7 @@ export const normalizeOrders = (orders: any[]): OrderType[] => {
               ? total + price
               : total;
           }, 0) * 100,
-        divisor: 1,
+        divisor: 100,
       },
       receipt_id: order.id,
       transactions: normalizeShopifyTransactions(
