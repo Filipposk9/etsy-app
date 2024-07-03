@@ -7,7 +7,10 @@ import OrderDetails, { Transaction } from "./OrderDetails";
 import * as GoProsvasisApi from "../network/goProsvasis_api";
 
 import { calculateTotalOrderPrice } from "../utils/calculateTotalOrderPrice";
-import { normalizeTransactions } from "../utils/normalizeTransactions";
+import {
+  EXCHANGE_RATE,
+  normalizeTransactions,
+} from "../utils/normalizeTransactions";
 
 import * as ReceiptsApi from "../network/receipts_api";
 import { normalizeCountry } from "../utils/normalizeCountry";
@@ -108,7 +111,11 @@ const Order = ({
         ),
         gift_wrap_price: gift_wrap_price.amount / gift_wrap_price.divisor,
         total_shipping_cost:
-          total_shipping_cost.amount / total_shipping_cost.divisor,
+          subtotal.currency_code === "USD"
+            ? total_shipping_cost.amount /
+              total_shipping_cost.divisor /
+              EXCHANGE_RATE
+            : total_shipping_cost.amount / total_shipping_cost.divisor,
       });
       if (invoice.data.success) {
         localStorage.setItem(
