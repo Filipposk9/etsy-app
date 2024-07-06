@@ -1,4 +1,10 @@
-export function createVoucher(order: any, countryIsEu: boolean | undefined) {
+import { EXCHANGE_RATE } from "./normalizeTransactions";
+
+export function createVoucher(
+  order: any,
+  countryIsEu: boolean | undefined,
+  currency?: string
+) {
   const service = determineService(
     order.country_iso,
     order.gift_wrap_price,
@@ -29,7 +35,9 @@ export function createVoucher(order: any, countryIsEu: boolean | undefined) {
       organization = order.address2;
     }
 
-    town = `${order.city} ${order.province_code}`;
+    town = `${order.city} ${
+      order.province_code !== null ? order.province_code : ""
+    }`;
   } else {
     const address = order.formatted_address.split("\n")[1];
 
@@ -147,10 +155,35 @@ export function createVoucher(order: any, countryIsEu: boolean | undefined) {
   streetName = latinizeWord(streetName);
   town = latinizeWord(town);
 
+  let total = 0;
+
+  let temp;
+
+  if (currency === "USD") {
+    order.transactions.map((item: any) => {
+      temp =
+        Math.round(
+          (((item.quantity * item.price.amount) / item.price.divisor -
+            item.shop_coupon) /
+            EXCHANGE_RATE) *
+            100
+        ) / 100;
+
+      total += Number(temp);
+    });
+
+    total +=
+      order.total_shipping_cost.amount /
+      order.total_shipping_cost.divisor /
+      EXCHANGE_RATE;
+  }
+
   const totalValue =
-    order.subtotal.amount / order.subtotal.divisor +
-    order.gift_wrap_price.amount / order.gift_wrap_price.divisor +
-    order.total_shipping_cost.amount / order.total_shipping_cost.divisor;
+    currency === "USD"
+      ? Math.round(total * 100) / 100
+      : order.subtotal.amount / order.subtotal.divisor +
+        order.gift_wrap_price.amount / order.gift_wrap_price.divisor +
+        order.total_shipping_cost.amount / order.total_shipping_cost.divisor;
 
   const baseVoucher = {
     Country: order.country_iso,
@@ -248,6 +281,7 @@ function latinizeWord(word: string): string {
     { from: /é/g, to: "e" },
     { from: /ó/g, to: "o" },
     { from: /ö/g, to: "o" },
+    { from: /Ð/g, to: "H" },
   ];
 
   let normalizedWord = word.normalize("NFD");

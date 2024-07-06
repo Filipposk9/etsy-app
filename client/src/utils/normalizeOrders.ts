@@ -16,7 +16,9 @@ export const normalizeOrders = (orders: any[]): OrderType[] => {
       province_code: order.shipping_address.province_code,
       country_iso: order.shipping_address.country_code,
       subtotal: {
-        amount: (Number(order.subtotal_price) + Number(order.total_tax)) * 100,
+        amount: Math.round(
+          (Number(order.subtotal_price) + Number(order.total_tax)) * 100
+        ),
         divisor: 100,
         currency_code: order.currency,
       },
