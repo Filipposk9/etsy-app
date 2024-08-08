@@ -38,7 +38,10 @@ const Shopify = (): JSX.Element | null => {
       try {
         setOrders([]);
         const orders = await ShopifyApi.getData();
-        setOrders(orders);
+
+        const normalizedOrders = normalizeOrders(orders);
+
+        setOrders(normalizedOrders);
       } catch (error) {
         alert(error);
         console.log(error);
